@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RoboTec Planner Korea 2026</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">RoboTec</p>
+        <h1>Planner Korea 2026</h1>
+      </div>
+      <button id="newTaskBtn" class="primary-button" type="button">Nueva tarea</button>
+    </header>
+
+    <main class="shell">
+      <section class="status-strip" aria-live="polite">
+        <div>
+          <span id="totalCount">0</span>
+          <small>tareas</small>
+        </div>
+        <div>
+          <span id="blockedCount">0</span>
+          <small>bloqueadas</small>
+        </div>
+        <div>
+          <span id="doneCount">0</span>
+          <small>terminadas</small>
+        </div>
+        <div>
+          <span id="dueSoonCount">0</span>
+          <small>esta semana</small>
+        </div>
+      </section>
+
+      <section id="setupPanel" class="setup-panel" hidden>
+        <h2>Conectar backend</h2>
+        <label>
+          URL de Apps Script
+          <input id="apiUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+        </label>
+        <button id="saveApiUrlBtn" class="primary-button" type="button">Guardar URL</button>
+      </section>
+
+      <section class="toolbar" aria-label="Filtros">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-view="all" type="button">Todas</button>
+          <button class="tab" data-view="today" type="button">Hoy</button>
+          <button class="tab" data-view="week" type="button">Esta semana</button>
+          <button class="tab" data-view="blocked" type="button">Bloqueadas</button>
+          <button class="tab" data-view="owner" type="button">Por responsable</button>
+          <button class="tab" data-view="area" type="button">Por área</button>
+        </div>
+
+        <div class="filters">
+          <input id="searchInput" type="search" placeholder="Buscar tarea">
+          <select id="areaFilter" aria-label="Área"></select>
+          <select id="ownerFilter" aria-label="Responsable"></select>
+          <select id="statusFilter" aria-label="Estado"></select>
+          <select id="priorityFilter" aria-label="Prioridad"></select>
+          <select id="modeFilter" aria-label="Modo"></select>
+          <input id="dateFilter" type="date" aria-label="Fecha">
+        </div>
+      </section>
+
+      <section id="content" class="content" aria-live="polite"></section>
+    </main>
+
+    <dialog id="taskDialog">
+      <form id="taskForm" method="dialog">
+        <header>
+          <h2 id="dialogTitle">Nueva tarea</h2>
+          <button class="ghost-button" value="cancel" type="button" id="closeDialogBtn">Cerrar</button>
+        </header>
+
+        <input id="taskId" type="hidden">
+        <label>
+          Tarea
+          <input id="taskName" name="task" required>
+        </label>
+        <div class="form-grid">
+          <label>Área<select id="taskArea" name="area" required></select></label>
+          <label>Estado<select id="taskStatus" name="status" required></select></label>
+          <label>Prioridad<select id="taskPriority" name="priority" required></select></label>
+          <label>Modo<select id="taskMode" name="work_mode" required></select></label>
+          <label>Inicio<input id="taskStart" name="start_date" type="date" required></label>
+          <label>Entrega<input id="taskDue" name="due_date" type="date" required></label>
+        </div>
+        <div class="form-grid">
+          <label>Responsable<input id="taskOwner" name="owner"></label>
+          <label>Colaboradores<input id="taskCollaborators" name="collaborators"></label>
+        </div>
+        <label>
+          Bloqueo
+          <input id="taskBlocker" name="blocker">
+        </label>
+        <label>
+          Notas
+          <textarea id="taskNotes" name="notes" rows="4"></textarea>
+        </label>
+        <label>
+          Evidencia
+          <input id="taskEvidence" name="evidence_url" type="url">
+        </label>
+        <div class="form-grid">
+          <label>Actualizado por<input id="updatedBy" name="updated_by" required></label>
+          <label>Código de equipo<input id="teamCode" name="team_code" type="password" required></label>
+        </div>
+        <footer>
+          <button id="archiveBtn" class="danger-button" type="button" hidden>Archivar</button>
+          <button class="primary-button" type="submit">Guardar</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <template id="taskCardTemplate">
+      <article class="task-card">
+        <div class="card-top">
+          <span class="pill area"></span>
+          <span class="pill priority"></span>
+        </div>
+        <h3></h3>
+        <p class="meta"></p>
+        <p class="notes"></p>
+        <div class="card-bottom">
+          <span class="status"></span>
+          <button class="ghost-button edit" type="button">Editar</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
