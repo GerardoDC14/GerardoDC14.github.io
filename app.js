@@ -47,6 +47,10 @@ const els = {
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
+  state.apiUrl = normalizeApiUrl(state.apiUrl);
+  if (state.apiUrl) {
+    localStorage.setItem("robotecPlannerApiUrl", state.apiUrl);
+  }
   els.apiUrlInput.value = state.apiUrl;
   els.setupPanel.hidden = Boolean(state.apiUrl);
   bindEvents();
@@ -60,7 +64,8 @@ function init() {
 
 function bindEvents() {
   els.saveApiUrlBtn.addEventListener("click", () => {
-    state.apiUrl = els.apiUrlInput.value.trim();
+    state.apiUrl = normalizeApiUrl(els.apiUrlInput.value);
+    els.apiUrlInput.value = state.apiUrl;
     localStorage.setItem("robotecPlannerApiUrl", state.apiUrl);
     els.setupPanel.hidden = Boolean(state.apiUrl);
     loadData();
@@ -82,6 +87,10 @@ function bindEvents() {
   els.closeDialogBtn.addEventListener("click", () => els.dialog.close());
   els.form.addEventListener("submit", saveTask);
   els.archiveBtn.addEventListener("click", archiveTask);
+}
+
+function normalizeApiUrl(value) {
+  return String(value || "").trim().replace("/macros/u/0/s/", "/macros/s/").replace("/macros/u/1/s/", "/macros/s/");
 }
 
 async function loadData() {
