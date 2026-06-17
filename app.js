@@ -3,7 +3,7 @@ const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbx76Rj1IqRkwZtW
 const TODAY = "2026-06-16";
 
 const state = {
-  apiUrl: localStorage.getItem("robotecPlannerApiUrl") || DEFAULT_API_URL,
+  apiUrl: normalizeApiUrl(localStorage.getItem("robotecPlannerApiUrl")) || DEFAULT_API_URL,
   tasks: [],
   config: {
     area: ["Mecánica", "Electrónica", "Programación", "Pruebas", "Logística viaje"],
@@ -96,15 +96,32 @@ function normalizeApiUrl(value) {
 async function loadData() {
   try {
     const data = await apiGet("bootstrap");
-    state.tasks = normalizeTasks(data.tasks || []);
-    state.config = { ...state.config, ...(data.config || {}) };
-    populateStaticFilters();
-    render();
+    applyBootstrapData(data);
   } catch (error) {
+    if (state.apiUrl !== DEFAULT_API_URL) {
+      try {
+        state.apiUrl = DEFAULT_API_URL;
+        localStorage.setItem("robotecPlannerApiUrl", state.apiUrl);
+        els.apiUrlInput.value = state.apiUrl;
+        const data = await apiGet("bootstrap");
+        applyBootstrapData(data);
+        return;
+      } catch (fallbackError) {
+        console.error(fallbackError);
+      }
+    }
     els.setupPanel.hidden = false;
-    els.content.innerHTML = `<div class="empty-state">No se pudo cargar el backend. Revisa la URL de Apps Script.</div>`;
+    els.content.innerHTML = `<div class="empty-state">No se pudo cargar el backend. Recarga la pagina o revisa la URL de Apps Script.</div>`;
     console.error(error);
   }
+}
+
+function applyBootstrapData(data) {
+  state.tasks = normalizeTasks(data.tasks || []);
+  state.config = { ...state.config, ...(data.config || {}) };
+  populateStaticFilters();
+  els.setupPanel.hidden = true;
+  render();
 }
 
 async function apiGet(action) {
