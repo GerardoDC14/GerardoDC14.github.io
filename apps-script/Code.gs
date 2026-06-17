@@ -13,9 +13,27 @@ const TASK_HEADERS = [
 
 function doGet(e) {
   const action = (e.parameter.action || "bootstrap").trim();
-  if (action === "tasks") return json_({ tasks: getTasks_() });
-  if (action === "config") return json_({ config: getConfig_() });
-  return json_({ tasks: getTasks_(), config: getConfig_(), people: getPeople_() });
+  const callback = e.parameter.callback || "";
+  try {
+    if (["createTask", "updateTask", "archiveTask"].includes(action)) {
+      const payload = JSON.parse(e.parameter.payload || "{}");
+      verifyTeamCode_(payload.team_code);
+      const lock = LockService.getScriptLock();
+      lock.waitLock(10000);
+      try {
+        if (action === "createTask") return respond_(createTask_(payload.task), callback);
+        if (action === "updateTask") return respond_(updateTask_(payload.task), callback);
+        if (action === "archiveTask") return respond_(archiveTask_(payload), callback);
+      } finally {
+        lock.releaseLock();
+      }
+    }
+    if (action === "tasks") return respond_({ tasks: getTasks_() }, callback);
+    if (action === "config") return respond_({ config: getConfig_() }, callback);
+    return respond_({ tasks: getTasks_(), config: getConfig_(), people: getPeople_() }, callback);
+  } catch (error) {
+    return respond_({ ok: false, error: error.message }, callback);
+  }
 }
 
 function doPost(e) {
@@ -162,4 +180,12 @@ function json_(payload) {
   return ContentService
     .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function respond_(payload, callback) {
+  if (!callback) return json_(payload);
+  const safeCallback = String(callback).replace(/[^\w.$]/g, "");
+  return ContentService
+    .createTextOutput(`${safeCallback}(${JSON.stringify(payload)});`)
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }

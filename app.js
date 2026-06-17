@@ -99,23 +99,49 @@ async function loadData() {
 }
 
 async function apiGet(action) {
-  const url = new URL(state.apiUrl);
-  url.searchParams.set("action", action);
-  const response = await fetch(url.toString());
-  if (!response.ok) throw new Error(`GET ${action} failed`);
-  return response.json();
+  return jsonp(action);
 }
 
 async function apiPost(action, payload) {
-  const response = await fetch(state.apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action, ...payload }),
-  });
-  if (!response.ok) throw new Error(`POST ${action} failed`);
-  const data = await response.json();
+  const data = await jsonp(action, payload);
   if (!data.ok) throw new Error(data.error || "Backend error");
   return data;
+}
+
+function jsonp(action, payload = {}) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `robotecPlanner_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement("script");
+    const url = new URL(state.apiUrl);
+    url.searchParams.set("action", action);
+    url.searchParams.set("callback", callbackName);
+    if (Object.keys(payload).length) {
+      url.searchParams.set("payload", JSON.stringify(payload));
+    }
+
+    const timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error(`Timeout calling ${action}`));
+    }, 15000);
+
+    function cleanup() {
+      window.clearTimeout(timeout);
+      delete window[callbackName];
+      script.remove();
+    }
+
+    window[callbackName] = (data) => {
+      cleanup();
+      resolve(data);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error(`JSONP ${action} failed`));
+    };
+    script.src = url.toString();
+    document.body.append(script);
+  });
 }
 
 function updateFilters() {

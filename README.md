@@ -29,4 +29,4 @@ El conector disponible no expone despliegue automatico de Apps Script. Pasos man
 7. Copia la URL `/exec` del Web App.
 8. Abre el planner y pega esa URL en el panel de conexion.
 
-El codigo del equipo se valida en Apps Script; no hay secretos reales hardcodeados en el frontend.
+El codigo del equipo se valida en Apps Script; no hay secretos reales hardcodeados en el frontend. Cada vez que cambies `apps-script/Code.gs`, crea una nueva implementacion o actualiza la implementacion existente para que la URL `/exec` use el codigo mas reciente.
