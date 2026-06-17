@@ -1,5 +1,5 @@
 const SHEET_ID = "1lqJ1MtkgVoC-e4hjU-SPqeUIGplV_4NemF8dXv5uk_s";
-const DEFAULT_API_URL = "";
+const DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbx76Rj1IqRkwZtWNHkNEQ_oRocd2tgo-dvzCFmjaQSTlueJQotagwsNhHDWtQLuhSL7/exec";
 const TODAY = "2026-06-16";
 
 const state = {
