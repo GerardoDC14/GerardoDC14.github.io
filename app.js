@@ -1,108 +1,186 @@
-const canvas = document.querySelector('#world');
-const context = canvas.getContext('2d');
-const labels = {
-  left: document.querySelector('#left-command'), right: document.querySelector('#right-command'),
-  position: document.querySelector('#position'), heading: document.querySelector('#heading'),
-  velocity: document.querySelector('#velocity'), clock: document.querySelector('#clock'),
-};
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
 
-const robot = { x: 0, y: 0, theta: 0, left: 0, right: 0, trail: [] };
+const canvas = document.querySelector('#simulador');
+const loading = document.querySelector('#cargando');
+const loadingMessage = document.querySelector('#mensaje-carga');
+const loadingProgress = document.querySelector('#progreso-carga');
+const status = document.querySelector('#estado');
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#515854');
+scene.fog = new THREE.Fog('#515854', 5, 13);
+
+const camera = new THREE.PerspectiveCamera(42, 1, .01, 100);
+camera.position.set(.68, .62, .86);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.08, 0);
+controls.enableDamping = true;
+controls.dampingFactor = .065;
+controls.maxPolarAngle = Math.PI / 2.02;
+controls.minDistance = .35;
+controls.maxDistance = 8;
+
+scene.add(new THREE.HemisphereLight('#dce5df', '#323834', 2.4));
+const keyLight = new THREE.DirectionalLight('#fff5da', 3.2);
+keyLight.position.set(-2.8, 4.4, 1.8);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.camera.left = -3;
+keyLight.shadow.camera.right = 3;
+keyLight.shadow.camera.top = 3;
+keyLight.shadow.camera.bottom = -3;
+scene.add(keyLight);
+
+const texture = new THREE.TextureLoader().load('assets/pista-sistemas-embebidos.png');
+texture.colorSpace = THREE.SRGBColorSpace;
+texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(4.8, 4.8),
+  new THREE.MeshStandardMaterial({ map: texture, roughness: .88, metalness: 0 }),
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const robot = new THREE.Group();
+scene.add(robot);
 const pressed = new Set();
-const MAX_COMMAND = 6000;
-const MAX_TRACK_SPEED = 0.48; // m/s: intentionally simple V1 model
-const TRACK_SEPARATION = 0.086; // m, configurable in later hardware-calibrated release
-let elapsed = 0;
-let lastFrame = performance.now();
+let leftCommand = 0;
+let rightCommand = 0;
+let lastTime = performance.now();
+const MAX_TRACK_SPEED = .46;
+const TRACK_SEPARATION = .086;
 
-function resizeCanvas() {
-  const ratio = window.devicePixelRatio || 1;
-  const bounds = canvas.getBoundingClientRect();
-  canvas.width = Math.round(bounds.width * ratio);
-  canvas.height = Math.round(bounds.height * ratio);
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+function setStatus(message, error = false) {
+  status.textContent = message;
+  status.classList.add('visible');
+  status.classList.toggle('error', error);
+  if (!error) setTimeout(() => status.classList.remove('visible'), 2100);
 }
 
-function setCommandsFromKeys() {
-  const up = pressed.has('ArrowUp'); const down = pressed.has('ArrowDown');
-  const left = pressed.has('ArrowLeft'); const right = pressed.has('ArrowRight');
-  if (up) [robot.left, robot.right] = [2700, 2700];
-  else if (down) [robot.left, robot.right] = [-2200, -2200];
-  else if (left) [robot.left, robot.right] = [-1800, 1800];
-  else if (right) [robot.left, robot.right] = [1800, -1800];
-  else [robot.left, robot.right] = [0, 0];
-}
+async function fetchWithProgress(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`No se pudo cargar el archivo STEP (${response.status}).`);
+  const total = Number(response.headers.get('content-length')) || 0;
+  if (!response.body || !total) return new Uint8Array(await response.arrayBuffer());
 
-function step(dt) {
-  setCommandsFromKeys();
-  const leftVelocity = robot.left / MAX_COMMAND * MAX_TRACK_SPEED;
-  const rightVelocity = robot.right / MAX_COMMAND * MAX_TRACK_SPEED;
-  const linearVelocity = (leftVelocity + rightVelocity) / 2;
-  const angularVelocity = (rightVelocity - leftVelocity) / TRACK_SEPARATION;
-  robot.theta += angularVelocity * dt;
-  robot.x += linearVelocity * Math.cos(robot.theta) * dt;
-  robot.y += linearVelocity * Math.sin(robot.theta) * dt;
-  robot.x = Math.max(-1.87, Math.min(1.87, robot.x));
-  robot.y = Math.max(-1.87, Math.min(1.87, robot.y));
-  if (Math.abs(linearVelocity) > 0.001 || Math.abs(angularVelocity) > 0.001) {
-    const last = robot.trail.at(-1);
-    if (!last || Math.hypot(last.x - robot.x, last.y - robot.y) > 0.012) robot.trail.push({ x: robot.x, y: robot.y });
-    if (robot.trail.length > 600) robot.trail.shift();
+  const reader = response.body.getReader();
+  let received = 0;
+  const chunks = [];
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    loadingProgress.textContent = `${Math.round(received / total * 100)} % descargado`;
   }
-  elapsed += dt;
+  const file = new Uint8Array(received);
+  let offset = 0;
+  chunks.forEach(chunk => { file.set(chunk, offset); offset += chunk.length; });
+  return file;
 }
 
-function mapToCanvas(x, y, width, height) {
-  const scale = Math.min(width, height) / 4;
-  return { x: width / 2 + x * scale, y: height / 2 - y * scale, scale };
+function makeMesh(source) {
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(source.attributes.position.array, 3));
+  if (source.attributes.normal) {
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(source.attributes.normal.array, 3));
+  }
+  geometry.setIndex(Array.from(source.index.array));
+  const color = source.color
+    ? new THREE.Color(source.color[0], source.color[1], source.color[2])
+    : new THREE.Color('#9ca39e');
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, roughness: .56, metalness: .22 }));
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
 }
 
-function drawWorld() {
-  const { width, height } = canvas.getBoundingClientRect();
-  context.clearRect(0, 0, width, height);
-  const gradient = context.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, '#e1e5e3'); gradient.addColorStop(.5, '#b7bebc'); gradient.addColorStop(1, '#d8dcda');
-  context.fillStyle = gradient; context.fillRect(0, 0, width, height);
-  // Fixed low-contrast features are intentional: later camera exercises must find pose from pixels.
-  context.fillStyle = 'rgba(67, 79, 73, .13)';
-  for (let x = 0; x < width; x += 42) context.fillRect(x, 0, 1, height);
-  for (let y = 0; y < height; y += 42) context.fillRect(0, y, width, 1);
-  context.save(); context.translate(width * .20, height * .30); context.rotate(-.16);
-  context.fillStyle = 'rgba(49, 91, 71, .32)'; context.font = `800 ${Math.min(width, height) * .13}px Manrope`;
-  context.fillText('JOHN', 0, 0); context.fillText('DEERE', 0, Math.min(width, height) * .12);
-  context.strokeStyle = 'rgba(49, 91, 71, .22)'; context.lineWidth = 3; context.strokeRect(-12, -Math.min(width, height) * .11, Math.min(width, height) * .41, Math.min(width, height) * .30); context.restore();
-  const origin = mapToCanvas(0, 0, width, height);
-  context.strokeStyle = 'rgba(21,33,29,.32)'; context.lineWidth = 1; context.beginPath(); context.moveTo(0, origin.y); context.lineTo(width, origin.y); context.moveTo(origin.x, 0); context.lineTo(origin.x, height); context.stroke();
-  context.fillStyle = 'rgba(21,33,29,.6)'; context.font = '10px "DM Mono"'; context.fillText('0,0', origin.x + 7, origin.y - 7);
-  if (robot.trail.length > 1) { context.strokeStyle = '#e98633'; context.lineWidth = 2; context.beginPath(); robot.trail.forEach((point, index) => { const p = mapToCanvas(point.x, point.y, width, height); index ? context.lineTo(p.x, p.y) : context.moveTo(p.x, p.y); }); context.stroke(); }
-  drawRobot(origin.scale, width, height);
+async function loadRobot() {
+  try {
+    loadingMessage.textContent = 'Descargando el modelo CAD del Zumo 2040…';
+    const file = await fetchWithProgress('assets/zumo-2040-robot.step');
+    loadingMessage.textContent = 'Convirtiendo la geometría STEP para la escena…';
+    loadingProgress.textContent = 'Este proceso ocurre localmente en tu navegador';
+    const occt = await window.occtimportjs();
+    const result = occt.ReadStepFile(file, {
+      linearDeflectionType: 'bounding_box_ratio',
+      linearDeflection: .003,
+      angularDeflection: .5,
+    });
+    if (!result.success) throw new Error('OpenCascade no pudo interpretar el archivo STEP.');
+
+    const cad = new THREE.Group();
+    result.meshes.forEach(source => cad.add(makeMesh(source)));
+    // The source STEP uses Y as its vertical axis, matching the Three.js scene.
+    cad.scale.setScalar(.001);
+    robot.add(cad);
+    const bounds = new THREE.Box3().setFromObject(cad);
+    cad.position.y -= bounds.min.y;
+    loading.classList.add('oculto');
+    setStatus('Modelo CAD listo');
+  } catch (error) {
+    console.error(error);
+    loadingMessage.textContent = 'No fue posible cargar el modelo CAD.';
+    loadingProgress.textContent = error.message;
+    status.classList.add('visible', 'error');
+    status.textContent = 'Error al cargar el STEP';
+  }
 }
 
-function drawRobot(scale, width, height) {
-  const p = mapToCanvas(robot.x, robot.y, width, height); const bodyLength = .118 * scale; const bodyWidth = .102 * scale;
-  context.save(); context.translate(p.x, p.y); context.rotate(-robot.theta);
-  context.shadowColor = 'rgba(0,0,0,.32)'; context.shadowBlur = 12; context.shadowOffsetY = 5;
-  context.fillStyle = '#17201d'; context.fillRect(-bodyLength / 2, -bodyWidth / 2, bodyLength, bodyWidth); context.shadowColor = 'transparent';
-  context.fillStyle = '#0a0d0c'; context.fillRect(-bodyLength / 2 + 3, -bodyWidth / 2 - 6, bodyLength - 6, 10); context.fillRect(-bodyLength / 2 + 3, bodyWidth / 2 - 4, bodyLength - 6, 10);
-  context.fillStyle = '#315b47'; context.fillRect(-bodyLength * .30, -bodyWidth * .30, bodyLength * .60, bodyWidth * .60);
-  context.fillStyle = '#b5c840'; context.fillRect(bodyLength * .18, -bodyWidth * .15, bodyLength * .12, bodyWidth * .30);
-  context.strokeStyle = '#fff'; context.lineWidth = 2; context.beginPath(); context.moveTo(bodyLength * .44, 0); context.lineTo(bodyLength * .68, 0); context.stroke();
-  context.restore();
+function updateCommands() {
+  if (pressed.has('ArrowUp')) [leftCommand, rightCommand] = [4200, 4200];
+  else if (pressed.has('ArrowDown')) [leftCommand, rightCommand] = [-3300, -3300];
+  else if (pressed.has('ArrowLeft')) [leftCommand, rightCommand] = [-2500, 2500];
+  else if (pressed.has('ArrowRight')) [leftCommand, rightCommand] = [2500, -2500];
+  else [leftCommand, rightCommand] = [0, 0];
 }
 
-function updateTelemetry() {
-  const speed = ((robot.left + robot.right) / 2 / MAX_COMMAND * MAX_TRACK_SPEED);
-  const heading = ((robot.theta * 180 / Math.PI) % 360 + 360) % 360;
-  const command = value => `${value >= 0 ? '+' : ''}${String(value).padStart(4, '0')}`;
-  labels.left.textContent = command(robot.left); labels.right.textContent = command(robot.right);
-  labels.position.innerHTML = `x ${robot.x >= 0 ? '+' : ''}${robot.x.toFixed(2)} <small>m</small> · y ${robot.y >= 0 ? '+' : ''}${robot.y.toFixed(2)} <small>m</small>`;
-  labels.heading.innerHTML = `${heading.toFixed(1).padStart(5, '0')}<small>°</small>`;
-  labels.velocity.innerHTML = `${Math.abs(speed).toFixed(2)}<small> m/s</small>`;
-  labels.clock.textContent = `t ${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${(elapsed % 60).toFixed(1).padStart(4, '0')}`;
+function moveRobot(dt) {
+  updateCommands();
+  const vL = leftCommand / 6000 * MAX_TRACK_SPEED;
+  const vR = rightCommand / 6000 * MAX_TRACK_SPEED;
+  const velocity = (vL + vR) / 2;
+  const rotation = (vR - vL) / TRACK_SEPARATION;
+  robot.rotation.y += rotation * dt;
+  robot.position.x += Math.sin(robot.rotation.y) * velocity * dt;
+  robot.position.z += Math.cos(robot.rotation.y) * velocity * dt;
+  robot.position.x = THREE.MathUtils.clamp(robot.position.x, -2.2, 2.2);
+  robot.position.z = THREE.MathUtils.clamp(robot.position.z, -2.2, 2.2);
 }
 
-function animate(now) { const dt = Math.min((now - lastFrame) / 1000, .04); lastFrame = now; step(dt); drawWorld(); updateTelemetry(); requestAnimationFrame(animate); }
-document.addEventListener('keydown', event => { if (event.key.startsWith('Arrow')) { event.preventDefault(); pressed.add(event.key); } });
-document.addEventListener('keyup', event => pressed.delete(event.key));
+function resize() {
+  const { clientWidth, clientHeight } = canvas;
+  renderer.setSize(clientWidth, clientHeight, false);
+  camera.aspect = clientWidth / clientHeight;
+  camera.updateProjectionMatrix();
+}
+
+function loop(now) {
+  const dt = Math.min((now - lastTime) / 1000, .05);
+  lastTime = now;
+  moveRobot(dt);
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+window.addEventListener('keydown', event => {
+  if (event.key.startsWith('Arrow')) {
+    pressed.add(event.key);
+    event.preventDefault();
+  }
+});
+window.addEventListener('keyup', event => pressed.delete(event.key));
 window.addEventListener('blur', () => pressed.clear());
-document.querySelector('#reset').addEventListener('click', () => { Object.assign(robot, { x:0, y:0, theta:0, left:0, right:0, trail:[] }); elapsed = 0; });
-window.addEventListener('resize', resizeCanvas); resizeCanvas(); requestAnimationFrame(animate);
+resize();
+requestAnimationFrame(loop);
+loadRobot();
