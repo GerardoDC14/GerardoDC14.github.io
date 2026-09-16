@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Entorno de simulación del Zumo 2040 para Sistemas Embebidos." />
     <title>Simulador Zumo 2040</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script src="vendor/occt-import-js.js"></script>
-    <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+    <link rel="stylesheet" href="styles.css?v=3d-1" />
+    <script src="vendor/occt-import-js.js?v=3d-1"></script>
+    <script type="importmap">{"imports":{"three":"./vendor/three.module.js?v=3d-1"}}</script>
   </head>
   <body>
     <canvas id="simulador" aria-label="Escena 3D del robot Zumo 2040 sobre la pista"></canvas>
@@ -15,6 +15,6 @@
     <aside class="ayuda" aria-label="Controles"><div class="teclas"><kbd>↑</kbd><span>Avanzar</span><kbd>↓</kbd><span>Retroceder</span><kbd>←</kbd><span>Girar a la izquierda</span><kbd>→</kbd><span>Girar a la derecha</span></div><p>Arrastra para orbitar · rueda para acercar</p></aside>
     <section id="cargando" class="cargando" aria-live="polite"><div class="indicador"></div><p id="mensaje-carga">Cargando el modelo CAD del Zumo 2040…</p><small id="progreso-carga">Preparando escena</small></section>
     <div id="estado" class="estado" role="status">Modelo CAD listo</div>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=3d-1"></script>
   </body>
 </html>
