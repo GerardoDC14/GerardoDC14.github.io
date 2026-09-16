@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Interactive Zumo 2040 simulation demonstrator for embedded systems." />
+    <title>Zumo 2040 · Simulation Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">Z</span><span>Zumo 2040 <em>Simulation Lab</em></span></div>
+        <div class="status"><span class="status-dot"></span> V1 · World &amp; teleoperation</div>
+      </header>
+
+      <section class="intro">
+        <div>
+          <p class="eyebrow">TE2004B · Advanced Embedded Systems</p>
+          <h1>See the robot before<br />you program the robot.</h1>
+        </div>
+        <p class="intro-copy">A browser-based digital environment for the Pololu Zumo 2040. This first demonstrator exposes the world, differential-drive motion, live pose, and motor commands.</p>
+      </section>
+
+      <section class="lab-grid">
+        <div class="world-panel panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">SIMULATION WORLD</p><h2>Visual-localization canvas</h2></div>
+            <div class="world-scale">4.0 m × 4.0 m</div>
+          </div>
+          <div class="world-wrap">
+            <canvas id="world" aria-label="Interactive top-down robot world"></canvas>
+            <div class="canvas-badge"><span></span> Ground truth active</div>
+            <div class="north">N <i></i></div>
+          </div>
+          <div class="world-footer"><span>Reference field: grayscale landmarks for future camera localization</span><span id="clock">t 00:00.0</span></div>
+        </div>
+
+        <aside class="control-panel panel">
+          <div class="panel-heading"><div><p class="eyebrow">MANUAL CONTROL</p><h2>Drive the Zumo</h2></div></div>
+          <p class="control-description">Use the arrow keys. Release a key to stop. The model accepts the same signed left/right motor-command concept used by the hardware library.</p>
+          <div class="keypad" aria-label="Arrow-key controls">
+            <span></span><kbd>↑</kbd><span></span>
+            <kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd>
+          </div>
+          <div class="command-strip"><span>LEFT</span><strong id="left-command">+0000</strong><span>RIGHT</span><strong id="right-command">+0000</strong></div>
+          <button id="reset" type="button">Reset robot to origin <span>↺</span></button>
+          <div class="note"><span>V1 scope</span><p>No encoder, IMU, or camera data is used in the controller. Those interfaces are deliberately reserved for subsequent modules.</p></div>
+        </aside>
+      </section>
+
+      <section class="telemetry">
+        <article class="metric"><p class="eyebrow">GROUND-TRUTH POSE</p><div class="metric-value" id="position">x +0.00 <small>m</small> · y +0.00 <small>m</small></div><p>World-frame position</p></article>
+        <article class="metric"><p class="eyebrow">HEADING</p><div class="metric-value" id="heading">000.0<small>°</small></div><p>Counter-clockwise from +x</p></article>
+        <article class="metric"><p class="eyebrow">COMMAND VELOCITY</p><div class="metric-value" id="velocity">0.00<small> m/s</small></div><p>Derived from motor command</p></article>
+        <article class="metric next"><p class="eyebrow">NEXT INTERFACE</p><div class="metric-value">CAMERA<small> V4</small></div><p>Global image stream and pose estimation</p></article>
+      </section>
+
+      <section class="roadmap panel">
+        <div><p class="eyebrow">PROGRESSION</p><h2>One world, increasingly capable observers.</h2></div>
+        <ol>
+          <li class="active"><b>01</b><span><strong>Open loop</strong><small>PWM + time</small></span></li>
+          <li><b>02</b><span><strong>Odometry</strong><small>Quadrature encoders</small></span></li>
+          <li><b>03</b><span><strong>Sensor fusion</strong><small>IMU + encoders</small></span></li>
+          <li><b>04</b><span><strong>Vision</strong><small>Global camera pose</small></span></li>
+          <li><b>05</b><span><strong>Algorithm lab</strong><small>Student controller</small></span></li>
+        </ol>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
