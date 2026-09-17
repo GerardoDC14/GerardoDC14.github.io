@@ -6,6 +6,11 @@ const loading = document.querySelector('#cargando');
 const loadingMessage = document.querySelector('#mensaje-carga');
 const loadingProgress = document.querySelector('#progreso-carga');
 const status = document.querySelector('#estado');
+const velocityReadout = document.querySelector('#velocidad');
+const gyroReadout = document.querySelector('#giro-imu');
+const headingReadout = document.querySelector('#orientacion');
+const speedBar = document.querySelector('#barra-velocidad');
+const speedPercent = document.querySelector('#porcentaje-velocidad');
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -55,6 +60,8 @@ const pressed = new Set();
 let leftCommand = 0;
 let rightCommand = 0;
 let lastTime = performance.now();
+let simulatedVelocity = 0;
+let simulatedGyro = 0;
 const MAX_TRACK_SPEED = .46;
 const TRACK_SEPARATION = .086;
 
@@ -149,11 +156,25 @@ function moveRobot(dt) {
   const vR = rightCommand / 6000 * MAX_TRACK_SPEED;
   const velocity = (vL + vR) / 2;
   const rotation = (vR - vL) / TRACK_SEPARATION;
+  simulatedVelocity = velocity;
+  simulatedGyro = rotation;
   robot.rotation.y += rotation * dt;
-  robot.position.x += Math.sin(robot.rotation.y) * velocity * dt;
-  robot.position.z += Math.cos(robot.rotation.y) * velocity * dt;
+  // In the STEP file the robot's longitudinal axis is local +X, not local +Z.
+  robot.position.x += Math.cos(robot.rotation.y) * velocity * dt;
+  robot.position.z -= Math.sin(robot.rotation.y) * velocity * dt;
   robot.position.x = THREE.MathUtils.clamp(robot.position.x, -2.2, 2.2);
   robot.position.z = THREE.MathUtils.clamp(robot.position.z, -2.2, 2.2);
+}
+
+function updateTelemetry() {
+  const yaw = ((-robot.rotation.y * 180 / Math.PI) % 360 + 360) % 360;
+  const speed = Math.abs(simulatedVelocity);
+  const percent = Math.round(Math.min(speed / MAX_TRACK_SPEED, 1) * 100);
+  velocityReadout.textContent = `${simulatedVelocity.toFixed(2)} m/s`;
+  gyroReadout.textContent = `${simulatedGyro >= 0 ? '+' : ''}${simulatedGyro.toFixed(2)} rad/s`;
+  headingReadout.textContent = `${yaw.toFixed(1).padStart(5, '0')}°`;
+  speedBar.style.width = `${percent}%`;
+  speedPercent.textContent = `${percent}%`;
 }
 
 function resize() {
@@ -167,6 +188,7 @@ function loop(now) {
   const dt = Math.min((now - lastTime) / 1000, .05);
   lastTime = now;
   moveRobot(dt);
+  updateTelemetry();
   controls.update();
   renderer.render(scene, camera);
   requestAnimationFrame(loop);

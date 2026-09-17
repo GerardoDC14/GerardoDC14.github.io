@@ -13,6 +13,16 @@
     <canvas id="simulador" aria-label="Escena 3D del robot Zumo 2040 sobre la pista"></canvas>
     <header class="marca"><strong>SIMULADOR ZUMO 2040</strong><span>Laboratorio de Sistemas Embebidos</span></header>
     <aside class="ayuda" aria-label="Controles"><div class="teclas"><kbd>↑</kbd><span>Avanzar</span><kbd>↓</kbd><span>Retroceder</span><kbd>←</kbd><span>Girar a la izquierda</span><kbd>→</kbd><span>Girar a la derecha</span></div><p>Arrastra para orbitar · rueda para acercar</p></aside>
+    <aside class="telemetria" aria-label="Telemetría básica de la simulación">
+      <p>Telemetría del modelo</p>
+      <div class="lecturas">
+        <span>Velocidad</span><output id="velocidad">0.00 m/s</output>
+        <span>Giro IMU, ωz</span><output id="giro-imu">+0.00 rad/s</output>
+        <span>Orientación, ψ</span><output id="orientacion">000.0°</output>
+      </div>
+      <div class="medidor"><div><span>velocidad lineal</span><b id="porcentaje-velocidad">0%</b></div><i><em id="barra-velocidad"></em></i></div>
+      <small>Señales ideales del modelo cinemático</small>
+    </aside>
     <section id="cargando" class="cargando" aria-live="polite"><div class="indicador"></div><p id="mensaje-carga">Cargando el modelo CAD del Zumo 2040…</p><small id="progreso-carga">Preparando escena</small></section>
     <div id="estado" class="estado" role="status">Modelo CAD listo</div>
     <script type="module" src="app.js?v=3d-1"></script>
