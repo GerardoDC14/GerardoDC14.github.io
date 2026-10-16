@@ -13,7 +13,7 @@ Funciones: voz en español con tono y velocidad, detener voz, volumen entre 0 y 
 
 Los servicios inician con la sesión del usuario y requieren que la laptop permanezca encendida, conectada a Internet y sin suspenderse. Cerrar este chat no los detiene. No se modificó la suspensión ni se habilitó ejecución antes de iniciar sesión.
 
-El túnel de Cloudflare es temporal. Su supervisor publica su nueva URL en `connection.json` al iniciar; GitHub Pages puede tardar unos minutos en actualizarla. Si todavía aparece una dirección anterior, se puede pegar la URL actual manualmente. Cloudflare no garantiza disponibilidad para Quick Tunnels.
+El túnel de Cloudflare es temporal. Su supervisor publica su nueva URL en `connection.json` al iniciar; GitHub Pages puede tardar unos minutos en actualizarla. Si GitHub no está disponible, el supervisor reintenta indefinidamente con pausas de hasta 60 segundos. Si todavía aparece una dirección anterior, se puede pegar la URL actual manualmente. Cloudflare no garantiza disponibilidad para Quick Tunnels.
 
 ## Controles de acceso
 

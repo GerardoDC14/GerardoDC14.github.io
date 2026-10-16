@@ -5,6 +5,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import threading
 import time
 
 ROOT = Path(__file__).resolve().parent
@@ -21,6 +22,18 @@ def publish(url):
     if result.returncode:
         raise RuntimeError('No se pudo actualizar la dirección en GitHub Pages.')
 
+def keep_publishing(url):
+    delay = 5
+    while True:
+        try:
+            publish(url)
+            print('Dirección del panel actualizada en GitHub Pages.', flush=True)
+            return
+        except Exception as error:
+            print(f'{error} Reintento en {delay} segundos.', flush=True)
+            time.sleep(delay)
+            delay = min(delay * 2, 60)
+
 process = subprocess.Popen([str(ROOT / 'cloudflared'), 'tunnel', '--no-autoupdate', '--protocol', 'http2', '--url', 'http://127.0.0.1:8765'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 try:
     for line in process.stdout:
@@ -29,16 +42,7 @@ try:
         if match:
             url = match.group()
             (ROOT / 'tunnel-url.txt').write_text(url + '\n')
-            for attempt in range(3):
-                try:
-                    publish(url)
-                    print('Dirección del panel actualizada en GitHub Pages.', flush=True)
-                    break
-                except Exception as error:
-                    print(str(error), flush=True)
-                    time.sleep(5)
-            else:
-                print('Usa la dirección guardada en tunnel-url.txt para conectar manualmente.', flush=True)
+            threading.Thread(target=keep_publishing, args=(url,), daemon=True).start()
     sys.exit(process.wait() or 1)
 finally:
     process.terminate()
