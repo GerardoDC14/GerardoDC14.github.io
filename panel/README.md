@@ -34,3 +34,9 @@ La conexión WebSocket autentica el primer mensaje antes de ejecutar FFmpeg: no 
 El audio y el video son transmisiones separadas, sin sincronización garantizada. La transmisión PCM consume aproximadamente 2 MB por minuto, además del video si está activo. Los modos de video limitan la frecuencia a 1, 3 o 5 cuadros por segundo y ajustan la compresión JPEG. El rendimiento real depende de la red.
 
 Para comprobar autenticación, cierre de captura y validación: `python test_server.py` con las dependencias del agente instaladas.
+
+## Continuidad de audio (v2.1)
+
+La reproducción conserva todos los bloques recibidos, incluso cuando la red los entrega en ráfagas. El margen inicial es de un segundo; si una interrupción lo agota, se aumenta gradualmente hasta 2,5 segundos antes de reanudar. Solo Detener o el cierre de escucha cancelan audio pendiente. FFmpeg envía cada paquete sin esperar a llenar el búfer de salida. Se mantiene el formato PCM mono de 16 kHz.
+
+Pruebas del reproductor: `node --test panel/tests/pcm-player.test.cjs` desde la raíz del repositorio. Cubren ráfagas de dos segundos, pausas de red, recuperación y parada explícita.

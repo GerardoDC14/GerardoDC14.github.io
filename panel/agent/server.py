@@ -176,8 +176,8 @@ async def microphone_socket(request):
         microphones[ws] = {'stop': stop, 'done': done, 'token': token}
         process = await asyncio.create_subprocess_exec(
             'ffmpeg', '-nostdin', '-hide_banner', '-loglevel', 'error',
-            '-f', 'pulse', '-i', 'default', '-ac', '1', '-ar', '16000',
-            '-acodec', 'pcm_s16le', '-f', 's16le', 'pipe:1',
+            '-f', 'pulse', '-fragment_size', '2048', '-i', 'default', '-ac', '1', '-ar', '16000',
+            '-acodec', 'pcm_s16le', '-flush_packets', '1', '-f', 's16le', 'pipe:1',
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL)
         notice('MICRÓFONO ACTIVO: se está escuchando el audio de esta laptop desde el panel remoto.')
         await ws.send_json({'ready': True, 'sample_rate': 16000, 'channels': 1, 'format': 's16le'})
@@ -364,7 +364,7 @@ def create_app():
     async def asset(request):
         return web.FileResponse(ROOT.parent / 'github-pages-panel/panel' / request.match_info['asset'])
     app.router.add_get('/', home)
-    app.router.add_get('/{asset:panel\\.(?:js|css)}', asset)
+    app.router.add_get(r'/{asset:(?:panel\.(?:js|css)|pcm-player\.js)}', asset)
     app.cleanup_ctx.append(lifetime)
     return app
 
