@@ -21,7 +21,7 @@ def publish(url):
     if result.returncode:
         raise RuntimeError('No se pudo actualizar la dirección en GitHub Pages.')
 
-process = subprocess.Popen([str(ROOT / 'cloudflared'), 'tunnel', '--no-autoupdate', '--url', 'http://127.0.0.1:8765'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+process = subprocess.Popen([str(ROOT / 'cloudflared'), 'tunnel', '--no-autoupdate', '--protocol', 'http2', '--url', 'http://127.0.0.1:8765'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 try:
     for line in process.stdout:
         print(line, end='', flush=True)
