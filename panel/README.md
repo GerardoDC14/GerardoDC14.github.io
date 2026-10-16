@@ -2,7 +2,7 @@
 
 Abre https://gerardodc14.github.io/panel/ para conectar al equipo. El PIN se valida en el agente local; no está en este repositorio. El navegador conserva la dirección del túnel, pero mantiene el token de sesión solo en memoria.
 
-Funciones: voz en español con tono y velocidad, detener voz, volumen entre 0 y 100 %, silencio, cámara con video por cuadros JPEG y descarga manual de una foto. No ofrece terminal ni ejecución de comandos arbitrarios, captura de micrófono o grabación automática.
+Funciones: mensajes escritos con voz robótica en español, tono y velocidad, repetir el último mensaje, botones de frases, volumen entre 0 y 100 %, silencio, escucha del micrófono de la laptop, cámara por cuadros JPEG con modos de consumo de datos, espejo, pantalla completa, descarga manual de fotos y un botón para detener voz y ambas capturas. Muestra batería, latencia y tiempo de sesión. Recuerda ajustes de voz y video en el navegador y busca automáticamente la dirección actual del túnel. No ofrece terminal, ejecución de comandos arbitrarios, captura del micrófono del celular ni grabación automática.
 
 ## Operación en la laptop configurada
 
@@ -23,4 +23,14 @@ La cámara muestra una notificación local al activarse y conserva su indicador 
 
 ## Código
 
-`agent/server.py` contiene la API en Python (`aiohttp`, `opencv-python` y las herramientas `pactl`, `spd-say`, `notify-send`). `agent/tunnel.py` ejecuta un binario local `cloudflared` y usa `gh` autenticado para publicar la URL. La instalación local contiene las unidades systemd del usuario. El HTML debe estar disponible en la ruta configurada por el agente. Las acciones del sistema usan argumentos separados y una lista fija de comandos.
+`agent/server.py` contiene la API en Python (`aiohttp`, `opencv-python-headless` y las herramientas `pactl`, `spd-say`, `ffmpeg`, `notify-send`). `agent/tunnel.py` ejecuta un binario local `cloudflared` y usa `gh` autenticado para publicar la URL. La instalación local contiene las unidades systemd del usuario. El HTML debe estar disponible en la ruta configurada por el agente. Las acciones del sistema usan argumentos separados y una lista fija de comandos.
+
+## Escucha del micrófono
+
+Pulsa **Escuchar micrófono** en el celular. El navegador reproduce una transmisión PCM mono de 16 kHz recibida por WebSocket HTTPS. Requiere un navegador con Web Audio (AudioContext). No se pide permiso para el micrófono del celular. **Dejar de escuchar** apaga la captura y **Detener todo** cancela voz, cámara y escucha. El control de volumen de escucha solo afecta la reproducción del celular; el volumen de laptop controla sus altavoces. La opción de silenciar el micrófono modifica el dispositivo de entrada de la laptop.
+
+La conexión WebSocket autentica el primer mensaje antes de ejecutar FFmpeg: no se incluye ningún token en la URL. Solo se admite un oyente simultáneo. La captura termina al desconectarse el navegador, cerrar sesión, expirar el token o dejar de recibir el latido del cliente durante 15 segundos. Al ocultarse la página se detienen cámara y micrófono. La laptop muestra avisos al iniciar y terminar la escucha. No se escriben archivos de audio. La reproducción de mensajes siempre usa eSpeak a través de Speech Dispatcher.
+
+El audio y el video son transmisiones separadas, sin sincronización garantizada. La transmisión PCM consume aproximadamente 2 MB por minuto, además del video si está activo. Los modos de video limitan la frecuencia a 1, 3 o 5 cuadros por segundo y ajustan la compresión JPEG. El rendimiento real depende de la red.
+
+Para comprobar autenticación, cierre de captura y validación: `python test_server.py` con las dependencias del agente instaladas.
