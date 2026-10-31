@@ -1,90 +1,90 @@
 {
+  "sourceRevision": "58631b016b158136fdc1cf831b42433a81a29c23",
   "sourceRepository": "GerardoDC14/BUUT",
-  "sourceRevision": "6a72785532470e57225cf0e6fc27b5fc6325e054",
   "sourcePR": "https://github.com/GerardoDC14/BUUT/pull/90",
-  "localReference": "5907a2e900e386a76e57cf7405d1b453b9f47036",
-  "verifiedAt": "2026-10-31T18:20:52.884448+00:00",
+  "referenceLocalRevision": "5907a2e900e386a76e57cf7405d1b453b9f47036",
+  "verifiedAt": "2026-10-31T18:33:13.401305+00:00",
   "browser": "153.0.8010.12",
   "localResults": [
     {
       "name": "Acceso público: error y entrada",
       "result": "PASS",
-      "milliseconds": 484
+      "milliseconds": 579
     },
     {
       "name": "Cliente: alta, edición, relación, archivo y reactivación",
       "result": "PASS",
-      "milliseconds": 1157
+      "milliseconds": 736
     },
     {
       "name": "Concurrencia real entre pestañas: revisión obsoleta rechazada",
       "result": "PASS",
-      "milliseconds": 606
+      "milliseconds": 655
     },
     {
       "name": "Expediente: alta, vínculos, edición, estado y recarga",
       "result": "PASS",
-      "milliseconds": 877
+      "milliseconds": 305
     },
     {
       "name": "Documentos: carga v1 y v2, firmas inválidas, descargas y hash",
       "result": "PASS",
-      "milliseconds": 1003
+      "milliseconds": 727
     },
     {
       "name": "Escrituras: catálogo completo, alta, edición y exportación PDF/XLSX",
       "result": "PASS",
-      "milliseconds": 722
+      "milliseconds": 763
     },
     {
       "name": "Cotización y fiscal: reglas locales, parámetros y snapshots",
       "result": "PASS",
-      "milliseconds": 1135
+      "milliseconds": 759
     },
     {
       "name": "Riesgo: cuestionario, evaluación provisional e historial",
       "result": "PASS",
-      "milliseconds": 463
+      "milliseconds": 240
     },
     {
       "name": "Cumplimiento asistido: evidencia y revisión",
       "result": "PASS",
-      "milliseconds": 157
+      "milliseconds": 169
     },
     {
       "name": "Contabilidad: movimientos, saldos, reversión y cierre",
       "result": "PASS",
-      "milliseconds": 427
+      "milliseconds": 481
     },
     {
       "name": "Reportes e historial: filtro, CSV, JSON, persistencia",
       "result": "PASS",
-      "milliseconds": 294
+      "milliseconds": 317
     },
     {
       "name": "Respaldo con binarios y recuperación aislada íntegra",
       "result": "PASS",
-      "milliseconds": 1389
+      "milliseconds": 792
     },
     {
       "name": "Preferencias: tema, lectura, recarga y teclado",
       "result": "PASS",
-      "milliseconds": 64
+      "milliseconds": 82
     },
     {
       "name": "Móvil emulado: 360, 390 y 430; todas las rutas sin desborde general",
       "result": "PASS",
-      "milliseconds": 15397
+      "milliseconds": 15420
     },
     {
       "name": "Presentación: catorce pasos, pausa, teclado, acciones reales y repetición",
       "result": "PASS",
-      "milliseconds": 977
+      "milliseconds": 973
     },
     {
       "name": "Restablecimiento exclusivo, salida y ausencia de backend",
       "result": "PASS",
-      "milliseconds": 522
+      "milliseconds": 211
     }
   ],
   "additionalResults": [
@@ -128,7 +128,7 @@
   },
   "builds": [
     "desktop",
-    "Rust HTTP frontend",
+    "HTTP frontend",
     "static browser"
   ],
   "mobile": {
@@ -140,7 +140,8 @@
     "touchEmulated": true,
     "physicalS24FE": "pending for this revision"
   },
-  "sourceCI": "No executable result; independent local verification",
-  "backend": "No Rust, tunnel, API or external origin required",
-  "privateSecurity": "Server dependency, not implemented in GitHub Pages"
+  "sourceCI": "Not executed; local and public browser verification are independent",
+  "backend": "Static edition; no Rust or tunnel required",
+  "privateSecurity": "Server dependency; not implemented in GitHub Pages",
+  "pdf": "Reader or verified download according to browser configuration; dialogs checked inside viewport"
 }
