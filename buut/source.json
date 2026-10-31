@@ -1,7 +1,8 @@
 {
   "repository": "GerardoDC14/BUUT",
-  "revision": "12d0373d47b3b2a02424cc91624317a13ff9ae7a",
-  "brand": "BUUT",
+  "revision": "6a72785532470e57225cf0e6fc27b5fc6325e054",
+  "referenceLocalRevision": "5907a2e900e386a76e57cf7405d1b453b9f47036",
   "mode": "local-browser",
-  "referenceLocalRevision": "5907a2e900e386a76e57cf7405d1b453b9f47036"
+  "schema": 3,
+  "catalogMigrationSha256": "4580c9a861a1f83902b530561231f2d8559242bc5d4dd84ed702d3c1eb4e87db"
 }
