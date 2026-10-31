@@ -1,0 +1,146 @@
+{
+  "sourceRepository": "GerardoDC14/BUUT",
+  "sourceRevision": "6a72785532470e57225cf0e6fc27b5fc6325e054",
+  "sourcePR": "https://github.com/GerardoDC14/BUUT/pull/90",
+  "localReference": "5907a2e900e386a76e57cf7405d1b453b9f47036",
+  "verifiedAt": "2026-10-31T18:20:52.884448+00:00",
+  "browser": "153.0.8010.12",
+  "localResults": [
+    {
+      "name": "Acceso público: error y entrada",
+      "result": "PASS",
+      "milliseconds": 484
+    },
+    {
+      "name": "Cliente: alta, edición, relación, archivo y reactivación",
+      "result": "PASS",
+      "milliseconds": 1157
+    },
+    {
+      "name": "Concurrencia real entre pestañas: revisión obsoleta rechazada",
+      "result": "PASS",
+      "milliseconds": 606
+    },
+    {
+      "name": "Expediente: alta, vínculos, edición, estado y recarga",
+      "result": "PASS",
+      "milliseconds": 877
+    },
+    {
+      "name": "Documentos: carga v1 y v2, firmas inválidas, descargas y hash",
+      "result": "PASS",
+      "milliseconds": 1003
+    },
+    {
+      "name": "Escrituras: catálogo completo, alta, edición y exportación PDF/XLSX",
+      "result": "PASS",
+      "milliseconds": 722
+    },
+    {
+      "name": "Cotización y fiscal: reglas locales, parámetros y snapshots",
+      "result": "PASS",
+      "milliseconds": 1135
+    },
+    {
+      "name": "Riesgo: cuestionario, evaluación provisional e historial",
+      "result": "PASS",
+      "milliseconds": 463
+    },
+    {
+      "name": "Cumplimiento asistido: evidencia y revisión",
+      "result": "PASS",
+      "milliseconds": 157
+    },
+    {
+      "name": "Contabilidad: movimientos, saldos, reversión y cierre",
+      "result": "PASS",
+      "milliseconds": 427
+    },
+    {
+      "name": "Reportes e historial: filtro, CSV, JSON, persistencia",
+      "result": "PASS",
+      "milliseconds": 294
+    },
+    {
+      "name": "Respaldo con binarios y recuperación aislada íntegra",
+      "result": "PASS",
+      "milliseconds": 1389
+    },
+    {
+      "name": "Preferencias: tema, lectura, recarga y teclado",
+      "result": "PASS",
+      "milliseconds": 64
+    },
+    {
+      "name": "Móvil emulado: 360, 390 y 430; todas las rutas sin desborde general",
+      "result": "PASS",
+      "milliseconds": 15397
+    },
+    {
+      "name": "Presentación: catorce pasos, pausa, teclado, acciones reales y repetición",
+      "result": "PASS",
+      "milliseconds": 977
+    },
+    {
+      "name": "Restablecimiento exclusivo, salida y ausencia de backend",
+      "result": "PASS",
+      "milliseconds": 522
+    }
+  ],
+  "additionalResults": [
+    {
+      "name": "Migración v2: UUID, notas, relaciones, versiones, cotización, origen intacto",
+      "result": "PASS"
+    },
+    {
+      "name": "Persona moral y fideicomiso: alta real y recarga",
+      "result": "PASS"
+    },
+    {
+      "name": "Archivos: límite exacto de 20 MiB, rechazo superior y visor TXT",
+      "result": "PASS"
+    },
+    {
+      "name": "Documentos por expediente y escritura; recarga y descarga",
+      "result": "PASS"
+    },
+    {
+      "name": "Reinicio real del navegador: perfil y documentos persistentes",
+      "result": "PASS"
+    },
+    {
+      "name": "Tacto y movimiento reducido en 390 px",
+      "result": "PASS"
+    },
+    {
+      "name": "PDF, PNG, JPEG, DOCX y XLSX: carga y contenido descargado",
+      "result": "PASS"
+    },
+    {
+      "name": "Presentación completa: 161 segundos reales, acciones y repetición",
+      "result": "PASS"
+    }
+  ],
+  "regressions": {
+    "tests": 152,
+    "passed": 152,
+    "failed": 0
+  },
+  "builds": [
+    "desktop",
+    "Rust HTTP frontend",
+    "static browser"
+  ],
+  "mobile": {
+    "emulatedWidths": [
+      360,
+      390,
+      430
+    ],
+    "touchEmulated": true,
+    "physicalS24FE": "pending for this revision"
+  },
+  "sourceCI": "No executable result; independent local verification",
+  "backend": "No Rust, tunnel, API or external origin required",
+  "privateSecurity": "Server dependency, not implemented in GitHub Pages"
+}
