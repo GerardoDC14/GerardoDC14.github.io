@@ -1,8 +1,9 @@
 {
   "repository": "GerardoDC14/BUUT",
-  "revision": "58631b016b158136fdc1cf831b42433a81a29c23",
+  "revision": "7dd8604c481167267a0df5e1864222e053eeb89a",
   "referenceLocalRevision": "5907a2e900e386a76e57cf7405d1b453b9f47036",
   "mode": "local-browser",
   "schema": 3,
+  "actCatalogHistory": 1,
   "catalogMigrationSha256": "4580c9a861a1f83902b530561231f2d8559242bc5d4dd84ed702d3c1eb4e87db"
 }
